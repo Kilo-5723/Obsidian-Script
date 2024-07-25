@@ -5,7 +5,7 @@ async function up_to_date(fname) {
   return new Promise((resolve, reject) => {
     fs.stat(fname, (err, stats) => {
       if (err) { resolve(false); return; } // file not exist
-      resolve((Date.now() - stats.mtimeMs) / 1000 < 1); // one hour
+      resolve((Date.now() - stats.mtimeMs) / 1000 / 3600 < 24); // one day
     });
   });
 }

@@ -2,7 +2,7 @@ const tool = require(__dirname + "/tool.js");
 const personal = require(__dirname + "/personal.js");
 const style = require(__dirname + "/style.js");
 
-// properties: source, contest, contest-id, name, problem-id, tags, lead -- problem
+// properties: source, contest, cid, problem, name, tags, lead -- problem
 
 let official, clist;
 
@@ -18,12 +18,12 @@ const init_promise = (async function init() {
     __dirname + "/json/cf-official.json",
     "https://codeforces.com/api/problemset.problems"))
     .result.problems;
-  clist = (await tool.read_or_update(
-    __dirname + "/json/cf-clist.json",
-    "https://clist.by:443/api/v4/json/problem/?" +
-    "limit=10000000&resource=codeforces.com&username=" + personal.clist_account +
-    "&api_key=" + personal.clist_api))
-    .objects;
+  // clist = (await tool.read_or_update(
+  //   __dirname + "/json/cf-clist.json",
+  //   "https://clist.by:443/api/v4/json/problem/?" +
+  //   "limit=10000000&resource=codeforces.com&username=" + personal.clist_account +
+  //   "&api_key=" + personal.clist_api))
+  //   .objects;
 })();
 
 async function add_dynamic_property(file) {
@@ -32,18 +32,16 @@ async function add_dynamic_property(file) {
   if (tool.exist_and_remove(file.tags, "todo")) file.todo = true;
   if (tool.exist_and_remove(file.tags, "draft")) file.draft = true;
   for (i in official)
-    if (official[i].contestId == file["contest-id"]
-      && official[i].index == file["problem-id"]) {
-      file["rating-official"] = official[i].rating; break;
+    if (official[i].contestId == file.cid
+      && official[i].index == file.problem) {
+      file.rating = official[i].rating; break;
     }
-  for (i in clist) {
-    if (clist[i].url == "https://codeforces.com/contest/" +
-      file["contest-id"] + "/problem/" + file["problem-id"]) {
-      file["rating-clist"] = clist[i].rating; break;
-    }
-  }
-  if (tool.exist_and_remove(file.tags, "todo")) file.todo = true;
-  if (tool.exist_and_remove(file.tags, "draft")) file.draft = true;
+  // for (i in clist) {
+  //   if (clist[i].url == "https://codeforces.com/contest/" +
+  //     file["contest-id"] + "/problem/" + file["problem-id"]) {
+  //     file["rating-clist"] = clist[i].rating; break;
+  //   }
+  // }
 }
 
 function rating_style(val) {
@@ -64,11 +62,11 @@ function rating(val) {
 function to_item(dv, file) {
   var item = "";
   var left = "", right = "";
-  const cid = file["contest-id"], pid = file["problem-id"];
+  const cid = file.cid, pid = file.problem;
   // first line: File link, (todo), (draft), (problem link), contest link
   left += style.filelink(dv.fileLink(file.file.path, false, file.name));
-  if (file.draft) left += style.draft;
-  if (file.todo) left += style.todo;
+  if (file.draft) left += " " + style.draft;
+  if (file.todo) left += " " + style.todo;
 
   var source = "";
   if (!file.collection)
@@ -87,10 +85,10 @@ function to_item(dv, file) {
   for (let i in file.tags)
     left += "&ensp;" + style.tag(file.tags[i]);
 
-  if (file["rating-official"])
-    right += style.rater("CF") + (file.collection ? " ~" : " ") + rating(file["rating-official"]) + "&ensp;";
-  if (file["rating-clist"])
-    right += style.rater("Clist") + (file.collection ? " ~" : " ") + rating(file["rating-clist"]) + "&ensp;";
+  if (file.rating)
+    right += style.rater("Rating") + (file.collection ? " ~" : " ") + rating(file.rating) + "&ensp;";
+  // if (file["rating-clist"])
+  //   right += style.rater("Clist") + (file.collection ? " ~" : " ") + rating(file["rating-clist"]) + "&ensp;";
 
   if (right) left += style.to_right(right);
   if (left) item += left + "<br>";
@@ -120,6 +118,4 @@ async function test() {
   // for (item in problems) console.log(await rating_clist(problems[item]));
 }
 
-const constval = 3;
-
-module.exports = { add_dynamic_property, rating_style, to_item, constval };
+module.exports = { contest_link, problem_link, add_dynamic_property, to_item };
