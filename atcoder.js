@@ -7,7 +7,6 @@ const style = require(__dirname + "/style.js");
 let kenkoooo;
 
 function contest_link(cid) {
-  https://atcoder.jp/contests/abc354/tasks/abc354_g
   return "https://atcoder.jp/contests/" + cid;
 }
 function problem_link(cid, pid) {
@@ -26,9 +25,10 @@ const init_promise = (async function init() {
 
 async function add_dynamic_property(file) {
   await init_promise;
-  if (tool.exist_and_remove(file.tags, "collection")) file.collection = true;
-  if (tool.exist_and_remove(file.tags, "todo")) file.todo = true;
-  if (tool.exist_and_remove(file.tags, "draft")) file.draft = true;
+  tags = [...file.tags];
+  if (tool.exist_and_remove(tags, "collection")) file.collection = true;
+  if (tool.exist_and_remove(tags, "todo")) file.todo = true;
+  if (tool.exist_and_remove(tags, "draft")) file.draft = true;
   const pid = file.cid + "_" + file.problem.toLowerCase();
   if (kenkoooo[pid]) file.rating = Math.max(kenkoooo[pid].difficulty, 0);
   // for (i in clist) {
@@ -60,6 +60,12 @@ function to_item(dv, file) {
   var item = "";
   var left = "", right = "";
   const cid = file.cid, pid = file.problem;
+
+  tags = [...file.tags];
+  if (tool.exist_and_remove(tags, "collection")) file.collection = true;
+  if (tool.exist_and_remove(tags, "todo")) file.todo = true;
+  if (tool.exist_and_remove(tags, "draft")) file.draft = true;
+
   // first line: File link, (todo), (draft), (problem link), contest link
   left += style.filelink(dv.fileLink(file.file.path, false, file.name));
   if (file.draft) left += " " + style.draft;
@@ -79,8 +85,8 @@ function to_item(dv, file) {
 
   if (file.collection)
     left += "&ensp;" + style.collection;
-  for (let i in file.tags)
-    left += "&ensp;" + style.tag(file.tags[i]);
+  for (let i in tags)
+    left += "&ensp;" + style.tag(tags[i]);
 
   if (file.rating)
     right += style.rater("Rating") + (file.collection ? " ~" : " ") + rating(file.rating) + "&ensp;";
