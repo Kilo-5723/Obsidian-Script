@@ -13,7 +13,7 @@ function problem_link(cid, pid) {
   return contest_link(cid) + "/problem/" + pid;
 }
 
-const init_promise = (async function init() {
+async function init() {
   official = (await tool.read_or_update(
     __dirname + "/json/cf-official.json",
     "https://codeforces.com/api/problemset.problems"))
@@ -24,10 +24,10 @@ const init_promise = (async function init() {
   //   "limit=10000000&resource=codeforces.com&username=" + personal.clist_account +
   //   "&api_key=" + personal.clist_api))
   //   .objects;
-})();
+}
 
 async function add_dynamic_property(file) {
-  await init_promise;
+  if (!official) await init();
   tags = [...file.tags];
   if (tool.exist_and_remove(tags, "collection")) file.collection = true;
   if (tool.exist_and_remove(tags, "todo")) file.todo = true;

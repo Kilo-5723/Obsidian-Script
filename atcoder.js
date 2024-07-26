@@ -13,7 +13,7 @@ function problem_link(cid, pid) {
   return contest_link(cid) + "/tasks/" + cid + "_" + pid.toLowerCase();
 }
 
-const init_promise = (async function init() {
+async function init() {
   kenkoooo = (await tool.read_or_update(__dirname + "/json/atc-kenkoooo.json",
     "https://kenkoooo.com/atcoder/resources/problem-models.json"));
   // clist = (await tool.read_or_update(__dirname + "/json/atc-clist.json",
@@ -21,10 +21,10 @@ const init_promise = (async function init() {
   //   "&limit=1000000&username=" + personal.clist_account +
   //   "&api_key=" + personal.clist_api))
   //   .objects;
-})();
+}
 
 async function add_dynamic_property(file) {
-  await init_promise;
+  if (!kenkoooo) await init();
   tags = [...file.tags];
   if (tool.exist_and_remove(tags, "collection")) file.collection = true;
   if (tool.exist_and_remove(tags, "todo")) file.todo = true;

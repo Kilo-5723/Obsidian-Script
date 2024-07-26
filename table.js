@@ -16,7 +16,7 @@ async function add_dynamic_property(file) {
 
 function to_item(dv, file) {
   let ref = get_ref(file);
-  if (!ref) return;
+  if (!ref) return "Unsupported Document: " + file.file.name;
   return ref.to_item(dv, file);
 }
 
